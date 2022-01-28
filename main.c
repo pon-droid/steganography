@@ -7,24 +7,67 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "./stb/stb_image_write.h"
 
-
-int main(void){
-	int width, height, chan;
-	unsigned char *img = stbi_load("cover.jpg", &width, &height, &chan, 0);
-	printf("P3\n%d %d\n255\n",width,height);
-//	unsigned char *new_img = STBI_MALLOC(width * height * chan);
-
-    unsigned char *cond = img + width * height * chan;
-    printf("%d\n",*cond);
-    int i = 0;
-	for(unsigned char *p = img; p != cond; p += chan){
-	//	printf("%d %d %d\n",*(img),*(img + 1),*(img + 2));
-		*(p) = 255;
-		i += 3;
+void c_tobinary(int bin[8], unsigned char x){
+	
+	int i;
+	for( i = 0; i < 8; i++){
+		bin[7-i] = (x >> i) & 1;
 	}
-	printf("%d\n",i);
+	
+}
 
-	stbi_write_jpg("new.jpg",width,height, chan,img,100);
+int d_todecimal(int bin[8]){
+    int total = 0;
+    
+	int i;
+	for( i = 0; i < 8; i++){
+		total *= 2;
+		total += bin[i];
+	}
+
+	return total;
+}
+
+int merge_bits(int cbin [8], int sbin [8]){
+	cbin[7] = sbin[3];
+	cbin[6] = sbin[2];
+	cbin[5] = sbin[1];
+	cbin[4] = sbin[0];
+
+	return d_todecimal(cbin);
+}
+
+unsigned char hide_in_colour(unsigned char c){
+	
+}
+
+
+int main(int argc, char *argv []){
+	if(argc != 4){
+		printf("INVALID\nUsage: steg [image] [secret_image] [output]\n");
+		return -1;
+	}
+	int CH,CW,CCHAN;
+	int SH, SW, SCHAN;
+	unsigned char *cover = stbi_load(argv[1], &CW, &CH, &CCHAN, 0);
+	unsigned char *secret = stbi_load(argv[2], &SW, &SH, &SCHAN, 0);
+
+	if(SH != CH || SW != CW){
+		printf("Stop!\n");
+		return -2;
+	}
+
+    unsigned char *cp, *sp;
+
+	for(cp = cover, sp = secret; cp != cover + CH * CW * CCHAN; cp += CCHAN, sp += SCHAN){
+	   	
+		*(cp + 2) = *(sp + 2);
+		*(cp + 1) = *(sp + 1);
+		*(cp) = *(sp);
+	}
+
+
+	stbi_write_jpg(argv[3],CW,CH, CCHAN,cover,100);
 
 
 	return 0;
