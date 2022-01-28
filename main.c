@@ -37,8 +37,13 @@ int merge_bits(int cbin [8], int sbin [8]){
 	return d_todecimal(cbin);
 }
 
-unsigned char hide_in_colour(unsigned char c){
-	
+unsigned char hide_in_colour(unsigned char c,unsigned char s){
+	int cbin[8];
+	c_tobinary(cbin,c);
+	int sbin[8];
+	c_tobinary(sbin,s);
+
+	return merge_bits(cbin,sbin);
 }
 
 
@@ -60,10 +65,9 @@ int main(int argc, char *argv []){
     unsigned char *cp, *sp;
 
 	for(cp = cover, sp = secret; cp != cover + CH * CW * CCHAN; cp += CCHAN, sp += SCHAN){
-	   	
-		*(cp + 2) = *(sp + 2);
-		*(cp + 1) = *(sp + 1);
-		*(cp) = *(sp);
+		*(cp) = hide_in_colour(*cp,*sp);
+		*(cp + 1) = hide_in_colour(*(cp+1),*(sp+1));
+		*(cp + 2) = hide_in_colour(*(cp+2),*(sp+2));	   	
 	}
 
 
