@@ -37,8 +37,8 @@ int merge_bits(int cbin [8], int sbin [8]){
 	return d_todecimal(cbin);
 }
 int merge_two_bits(int cbin[8], int sbin [8]){
-    cbin[4] = sbin[0];
-    cbin[5] = sbin[1];
+    cbin[6] = sbin[0];
+    cbin[7] = sbin[1];
 
     return d_todecimal(cbin);	
 }
@@ -49,6 +49,19 @@ int unmerge_bits(int bin[8]){
 	bin[2] = bin[6];
 	bin[3] = bin[7];
 
+	bin[4] = 0;
+	bin[5] = 0;
+	bin[6] = 0;
+	bin[7] = 0;
+
+	return d_todecimal(bin);
+}
+
+int unmerge_two_bits(int bin[8]){
+	bin[0] = bin[6];
+	bin[1] = bin[7];
+	bin[2] = 0;
+	bin[3] = 0;
 	bin[4] = 0;
 	bin[5] = 0;
 	bin[6] = 0;
@@ -82,6 +95,13 @@ unsigned char unhide_in_colour(unsigned char c){
 	return unmerge_bits(bin);
 }
 
+unsigned char unhide_in_colour_two_bits(unsigned char c){
+	int bin[8];
+	c_tobinary(bin,c);
+
+	return unmerge_two_bits(bin);
+}
+
 int main(int argc, char *argv []){
 	if(argc != 4 && argc != 3){
 		printf("Usage to unhide image: steg [image] [output image]\n");
@@ -108,9 +128,9 @@ int main(int argc, char *argv []){
 	    	for( x = 0; x < SW; x++){
 	    		int align = (y * SW + x) * SCHAN;
 	    		int calign = (y * CW + x) * CCHAN;
-	    		*(cp + calign) = hide_in_colour(*(cp + calign),*(sp + align));
-	    		*(cp + calign + 1) = hide_in_colour(*(cp + calign + 1),*(sp + align + 1));
-	    		*(cp + calign + 2) = hide_in_colour(*(cp + calign + 2),*(sp + align + 2));
+	    		*(cp + calign) = hide_in_colour_two_bits(*(cp + calign),*(sp + align));
+	    		*(cp + calign + 1) = hide_in_colour_two_bits(*(cp + calign + 1),*(sp + align + 1));
+	    		*(cp + calign + 2) = hide_in_colour_two_bits(*(cp + calign + 2),*(sp + align + 2));
 	    		//cp += CCHAN;
 	    		//sp += SCHAN;
 	    	}
@@ -135,9 +155,9 @@ int main(int argc, char *argv []){
 		unsigned char *hp;
 
 		for(hp = hidden; hp != hidden + HW * HH * HCHAN; hp += HCHAN){
-			*(hp) = unhide_in_colour(*(hp));
-			*(hp + 1) = unhide_in_colour(*(hp+1));
-			*(hp + 2) = unhide_in_colour(*(hp+2));
+			*(hp) = unhide_in_colour_two_bits(*(hp));
+			*(hp + 1) = unhide_in_colour_two_bits(*(hp+1));
+			*(hp + 2) = unhide_in_colour_two_bits(*(hp+2));
 		}
 
 		stbi_write_png(argv[2],HW,HH,HCHAN,hidden,HW * HCHAN);
